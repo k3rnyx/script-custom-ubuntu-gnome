@@ -21,10 +21,10 @@ install_deps() {
 }
 
 install_gtk_theme() {
-    echo "instalando tema Tokyo Night Storm..."
+    echo "instalando tema Tokyo Night Storm (macOS + float)..."
     git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git /tmp/tokyo-theme
     cd /tmp/tokyo-theme
-    ./install.sh --tweaks storm -l
+    ./install.sh --tweaks storm macos float -c dark -l
     if [ $? -eq 0 ]; then
         log "$THEMES_LOG" "OK" "Tokyo Night Storm instalado"
     else
@@ -35,51 +35,55 @@ install_gtk_theme() {
 }
 
 install_papirus() {
-    echo "instalando iconos Papirus..."
-    sudo add-apt-repository -y ppa:papirus/papirus
-    sudo apt update
-    sudo apt install -y papirus-icon-theme
+    echo "instalando iconos Papirus (solo base)..."
+    git clone --depth 1 https://github.com/PapirusDevelopmentTeam/papirus-icon-theme.git /tmp/papirus
+    mkdir -p ~/.icons/Papirus
+    cp -r /tmp/papirus/Papirus/* ~/.icons/Papirus/
     if [ $? -eq 0 ]; then
-        log "$ICONS_LOG" "OK" "Papirus instalado"
+        log "$ICONS_LOG" "OK" "Papirus base instalado en ~/.icons/"
     else
         log "$ICONS_LOG" "FAIL" "Error instalando Papirus"
     fi
+    rm -rf /tmp/papirus
 }
 
 install_sea() {
     echo "instalando iconos SEA..."
-    git clone --depth 1 https://github.com/linuxdeepin/deepin-icon-theme.git /tmp/deepin-icons
-    mkdir -p ~/.icons/Sea/places/scalable
-    cp /tmp/deepin-icons/Sea/index.theme ~/.icons/Sea/
-    cp /tmp/deepin-icons/Sea/places/scalable/*.svg ~/.icons/Sea/places/scalable/
+    wget -q https://github.com/linuxdeepin/deepin-icon-theme/archive/master.zip -O /tmp/deepin.zip
+    unzip -q /tmp/deepin.zip "deepin-icon-theme-master/Sea/*" -d /tmp/deepin
+    mkdir -p ~/.icons/Sea
+    cp -r /tmp/deepin/deepin-icon-theme-master/Sea/* ~/.icons/Sea/
     if [ $? -eq 0 ]; then
-        log "$ICONS_LOG" "OK" "SEA instalado (solo places)"
+        log "$ICONS_LOG" "OK" "SEA instalado desde master.zip"
     else
         log "$ICONS_LOG" "FAIL" "Error instalando SEA"
     fi
-    rm -rf /tmp/deepin-icons
+    rm -rf /tmp/deepin /tmp/deepin.zip
 }
 
 install_wallpapers() {
     echo "descargando wallpapers Tokyo Night Storm..."
     mkdir -p ~/.local/share/backgrounds/tokyo-night-storm
-    git clone --depth 1 https://github.com/tokyo-night/wallpapers.git /tmp/tn-wallpapers
-    find /tmp/tn-wallpapers/storm -name "*.png" -exec cp {} ~/.local/share/backgrounds/tokyo-night-storm/ \;
-    if [ $? -eq 0 ]; then
-        local count
-        count=$(ls ~/.local/share/backgrounds/tokyo-night-storm/*.png 2>/dev/null | wc -l)
+
+    wget -q https://raw.githubusercontent.com/tokyo-night/wallpapers/main/storm/minimal/gnome_00_1920x1080.png -P ~/.local/share/backgrounds/tokyo-night-storm/
+    wget -q https://raw.githubusercontent.com/tokyo-night/wallpapers/main/storm/minimal/stripes_00_1920x1080.png -P ~/.local/share/backgrounds/tokyo-night-storm/
+    wget -q https://raw.githubusercontent.com/tokyo-night/wallpapers/main/storm/abstract/lockscreen_00_1920x1080.png -P ~/.local/share/backgrounds/tokyo-night-storm/
+    wget -q https://raw.githubusercontent.com/tokyo-night/wallpapers/main/storm/os/debian_00_1920x1080.png -P ~/.local/share/backgrounds/tokyo-night-storm/
+
+    local count
+    count=$(ls ~/.local/share/backgrounds/tokyo-night-storm/*.png 2>/dev/null | wc -l)
+    if [ "$count" -gt 0 ]; then
         log "$WALL_LOG" "OK" "Wallpapers descargados: $count archivos"
     else
         log "$WALL_LOG" "FAIL" "Error descargando wallpapers"
     fi
-    rm -rf /tmp/tn-wallpapers
 }
 
 install_fonts() {
     echo "instalando JetBrains Mono Nerd Font..."
     wget -q -O /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
     unzip -o -q /tmp/JetBrainsMono.zip -d ~/.fonts/JetBrainsMono
-    fc-cache -fv
+    fc-cache -fv 2>/dev/null
     rm /tmp/JetBrainsMono.zip
     log "$THEMES_LOG" "OK" "JetBrains Mono Nerd Font instalada"
 }
