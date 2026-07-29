@@ -93,6 +93,30 @@ install_fonts() {
     log "$THEMES_LOG" "OK" "JetBrains Mono Nerd Font instalada"
 }
 
+install_cursors() {
+    echo "instalando Material Cursors Light..."
+    sudo apt install -y inkscape xcursorgen || {
+        log "$ICONS_LOG" "FAIL" "Error instalando inkscape/xcursorgen"
+        return 1
+    }
+    git clone --depth 1 https://github.com/varlesh/material-cursors.git /tmp/material-cursors || {
+        log "$ICONS_LOG" "FAIL" "Error clonando material-cursors"
+        return 1
+    }
+    cd /tmp/material-cursors
+    make build || {
+        log "$ICONS_LOG" "FAIL" "Error compilando cursores"
+        cd "$BASE_DIR"
+        rm -rf /tmp/material-cursors
+        return 1
+    }
+    mkdir -p ~/.icons
+    cp -r dist/material_light_cursors ~/.icons/
+    cd "$BASE_DIR"
+    rm -rf /tmp/material-cursors
+    log "$ICONS_LOG" "OK" "Material Cursors Light instalado"
+}
+
 apply_settings() {
     echo "aplicando configuración visual..."
 
@@ -110,11 +134,8 @@ apply_settings() {
     gsettings set org.gnome.desktop.interface icon-theme "Sea"
     log "$ICONS_LOG" "OK" "Icon theme: Sea"
 
-    local cursor
-    cursor=$(find ~/.icons -maxdepth 1 -name "Bibata*" -type d | head -1 | xargs basename 2>/dev/null)
-    if [ -n "$cursor" ]; then
-        gsettings set org.gnome.desktop.interface cursor-theme "$cursor"
-    fi
+    gsettings set org.gnome.desktop.interface cursor-theme "material_light_cursors"
+    log "$ICONS_LOG" "OK" "Cursor: material_light_cursors"
 
     local wallpaper
     wallpaper=$(find ~/.local/share/backgrounds/tokyo-night-storm -name "*.png" | shuf -n1)
@@ -144,6 +165,7 @@ main() {
     install_sea
     install_wallpapers
     install_fonts
+    install_cursors
     apply_settings
 
     echo "personalización completada"

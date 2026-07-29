@@ -5,6 +5,8 @@
 - [x] `modules/update.sh` — Actualizar sistema (`apt update && apt upgrade`)
 - [x] `modules/git.sh` — Instalar y configurar Git
 - [x] `modules/custom.sh` — Personalización del sistema
+- [x] `modules/extensions.sh` — Extensiones GNOME
+- [x] `modules/terminal.sh` — Terminal (Kitty + Oh My Zsh)
 
 ---
 
@@ -13,7 +15,7 @@
 - [ ] **Tema GTK Tokyo Night** — Descargar e instalar en `~/.themes/`
 - [ ] **Tema GNOME Shell Tokyo Night** — Aplicar tema del shell
 - [ ] **Iconos** — Descargar e instalar set compatible (Tela-circle / Tokyo Night icons) en `~/.icons/`
-- [ ] **Cursores** — Tema de cursores (ej. Bibata, capitaine-cursors)
+- [x] **Cursores** — Material Cursors Light
 - [ ] **Wallpaper Tokyo Night** — Descargar y aplicar con `gsettings set org.gnome.desktop.background picture-uri`
 - [ ] **Lock Screen** — Aplicar wallpaper de bloqueo con `gsettings set org.gnome.desktop.screensaver picture-uri`
 - [ ] **Fuentes** — Configurar fuente del sistema, monoespaciada y documentos
@@ -27,13 +29,15 @@
 
 ## 2. GNOME Shell Extensions
 
-- [ ] Instalar `chrome-gnome-shell` y `gnome-shell-extension-manager`
-- [ ] **Dash to Dock** — Personalizar dock (posición, tamaño, auto-ocultar)
-- [ ] **Blur my Shell** — Efecto de desenfoque en panel y overview
-- [ ] **Vitals** — Monitor de recursos en panel superior
-- [ ] **Clipboard Indicator** — Historial del portapapeles
-- [ ] **User Themes** — Permitir temas de shell personalizados
-- [ ] **AppIndicator and KStatusNotifierItem Support** — Iconos de bandeja
+- [x] Instalar `chrome-gnome-shell` y `gnome-shell-extension-manager`
+- [x] **Dash to Dock** — Personalizar dock (posición, tamaño, auto-ocultar)
+- [x] **Blur my Shell** — Efecto de desenfoque en panel y overview
+- [x] **Vitals** — Monitor de recursos en panel superior
+- [x] **Clipboard Indicator** — Historial del portapapeles
+- [x] **User Themes** — Permitir temas de shell personalizados
+- [x] **Just Perfection** — Tweaks de UI y comportamiento
+- [x] **Tiling Assistant** — Tiling automático de ventanas
+- [x] **gpick** — Color picker completo
 
 ---
 
@@ -48,11 +52,11 @@
 
 ## 4. Terminal
 
-- [ ] Instalar y configurar **ZSH** como shell por defecto
-- [ ] Instalar **Oh My Zsh** o **starship** para prompt personalizado
-- [ ] Aplicar tema Tokyo Night a la terminal (GNOME Terminal o kitty/alacritty)
-- [ ] Configurar fuente monoespaciada (JetBrains Mono, Nerd Fonts, Fira Code)
-- [ ] Transparencia y opacidad de la terminal
+- [x] Instalar y configurar **ZSH** como shell por defecto
+- [x] Instalar **Oh My Zsh** con powerlevel10k y plugins **starship** para prompt personalizado
+- [x] Aplicar tema Tokyo Night a Kittyokyo Night a la terminal (GNOME Terminal o kitty/alacritty)
+- [x] Configurar JetBrains Mono Nerd Font en Kitty monoespaciada (JetBrains Mono, Nerd Fonts, Fira Code)
+- [x] Transparencia 0.9 en Kitty y opacidad de la terminal
 
 ---
 
