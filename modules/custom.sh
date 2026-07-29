@@ -48,13 +48,16 @@ install_papirus() {
 }
 
 install_sea() {
-    echo "instalando iconos SEA..."
+    echo "instalando iconos SEA (solo folder*)..."
     wget -q https://github.com/linuxdeepin/deepin-icon-theme/archive/master.zip -O /tmp/deepin.zip
-    unzip -q /tmp/deepin.zip "deepin-icon-theme-master/Sea/*" -d /tmp/deepin
-    mkdir -p ~/.icons/Sea
-    cp -r /tmp/deepin/deepin-icon-theme-master/Sea/* ~/.icons/Sea/
-    if [ $? -eq 0 ]; then
-        log "$ICONS_LOG" "OK" "SEA instalado desde master.zip"
+    unzip -q /tmp/deepin.zip "deepin-icon-theme-master/Sea/places/scalable/folder*" -d /tmp/deepin
+    mkdir -p ~/.icons/Sea/places/scalable
+    cp /tmp/deepin/deepin-icon-theme-master/Sea/places/scalable/folder*.svg ~/.icons/Sea/places/scalable/
+    cp /tmp/deepin/deepin-icon-theme-master/Sea/index.theme ~/.icons/Sea/
+    result=$?
+    rm -rf ~/.icons/Sea/apps ~/.icons/Sea/devices ~/.icons/Sea/mimetypes 2>/dev/null
+    if [ $result -eq 0 ]; then
+        log "$ICONS_LOG" "OK" "SEA instalado (solo folder*)"
     else
         log "$ICONS_LOG" "FAIL" "Error instalando SEA"
     fi
