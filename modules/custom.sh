@@ -23,8 +23,8 @@ install_deps() {
 install_gtk_theme() {
     echo "instalando tema Tokyo Night Storm (macOS + float)..."
     git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git /tmp/tokyo-theme
-    cd /tmp/tokyo-theme
-    ./install.sh --tweaks storm macos float -c dark -l
+    cd /tmp/tokyo-theme/themes
+    bash install.sh --tweaks storm macos float -c dark -l
     if [ $? -eq 0 ]; then
         log "$THEMES_LOG" "OK" "Tokyo Night Storm instalado"
     else
