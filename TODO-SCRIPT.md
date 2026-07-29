@@ -4,7 +4,7 @@
 
 - [x] `modules/update.sh` — Actualizar sistema (`apt update && apt upgrade`)
 - [x] `modules/git.sh` — Instalar y configurar Git
-- [ ] `modules/custom.sh` — Personalización del sistema
+- [x] `modules/custom.sh` — Personalización del sistema
 
 ---
 
