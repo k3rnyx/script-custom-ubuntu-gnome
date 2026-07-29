@@ -25,7 +25,9 @@ install_gtk_theme() {
     git clone --depth 1 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme.git /tmp/tokyo-theme
     cd /tmp/tokyo-theme/themes
     bash install.sh --tweaks storm macos float -c dark -l
-    if [ $? -eq 0 ]; then
+    install_result=$?
+    sed -i '/#panel {/,/^}/s/border: 2px solid #29a4bd;/border: none;/' ~/.themes/Tokyonight-Dark-Storm/gnome-shell/gnome-shell.css
+    if [ $install_result -eq 0 ]; then
         log "$THEMES_LOG" "OK" "Tokyo Night Storm instalado"
     else
         log "$THEMES_LOG" "FAIL" "Error instalando Tokyo Night Storm"
