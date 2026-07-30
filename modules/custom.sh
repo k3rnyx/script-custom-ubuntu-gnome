@@ -6,6 +6,7 @@ source "$BASE_DIR/lib/ui.sh"
 THEMES_LOG="$BASE_DIR/assets/themeslogs/custom.log"
 ICONS_LOG="$BASE_DIR/assets/iconslogs/custom.log"
 WALL_LOG="$BASE_DIR/assets/wallpaperlogs/custom.log"
+CACHE_DIR="/tmp/tokyo-cache"
 
 log_file() {
     local file="$1" status="$2" msg="$3"
@@ -14,8 +15,7 @@ log_file() {
 
 install_deps() {
     log_info "Instalando dependencias..."
-    sudo apt install -y git wget unzip gtk2-engines-murrine sassc gnome-themes-extra
-    if [ $? -eq 0 ]; then
+    if _apt_ensure git wget unzip gtk2-engines-murrine sassc gnome-themes-extra; then
         log_file "$THEMES_LOG" "OK" "Dependencias instaladas"
     else
         log_file "$THEMES_LOG" "FAIL" "Error instalando dependencias"
@@ -53,8 +53,11 @@ install_papirus() {
 
 install_sea() {
     log_info "Instalando iconos SEA (solo folder*)..."
-    wget -q https://github.com/linuxdeepin/deepin-icon-theme/archive/master.zip -O /tmp/deepin.zip
-    unzip -q /tmp/deepin.zip "deepin-icon-theme-master/Sea/places/scalable/folder*" -d /tmp/deepin
+    if [ ! -f "$CACHE_DIR/deepin.zip" ]; then
+        log_detail "Descargando deepin-icon-theme..."
+        wget -q https://github.com/linuxdeepin/deepin-icon-theme/archive/master.zip -O "$CACHE_DIR/deepin.zip"
+    fi
+    unzip -q "$CACHE_DIR/deepin.zip" "deepin-icon-theme-master/Sea/places/scalable/folder*" -d /tmp/deepin
     mkdir -p ~/.icons/Sea/places/scalable
     cp /tmp/deepin/deepin-icon-theme-master/Sea/places/scalable/folder*.svg ~/.icons/Sea/places/scalable/
     cp /tmp/deepin/deepin-icon-theme-master/Sea/index.theme ~/.icons/Sea/
@@ -65,7 +68,7 @@ install_sea() {
     else
         log_file "$ICONS_LOG" "FAIL" "Error instalando SEA"
     fi
-    rm -rf /tmp/deepin /tmp/deepin.zip
+    rm -rf /tmp/deepin
 }
 
 install_wallpapers() {
@@ -88,16 +91,18 @@ install_wallpapers() {
 
 install_fonts() {
     log_info "Instalando JetBrains Mono Nerd Font..."
-    wget -q -O /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
-    unzip -o -q /tmp/JetBrainsMono.zip -d ~/.fonts/JetBrainsMono
+    if [ ! -f "$CACHE_DIR/JetBrainsMono.zip" ]; then
+        log_detail "Descargando JetBrains Mono..."
+        wget -q -O "$CACHE_DIR/JetBrainsMono.zip" https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+    fi
+    unzip -o -q "$CACHE_DIR/JetBrainsMono.zip" -d ~/.fonts/JetBrainsMono
     fc-cache -fv 2>/dev/null
-    rm /tmp/JetBrainsMono.zip
     log_file "$THEMES_LOG" "OK" "JetBrains Mono Nerd Font instalada"
 }
 
 install_cursors() {
     log_info "Instalando Material Cursors Light..."
-    sudo apt install -y inkscape xcursorgen || {
+    _apt_ensure inkscape xcursorgen || {
         log_file "$ICONS_LOG" "FAIL" "Error instalando inkscape/xcursorgen"
         return 1
     }
@@ -160,6 +165,7 @@ main() {
     for dir in "$BASE_DIR/assets/themeslogs" "$BASE_DIR/assets/iconslogs" "$BASE_DIR/assets/wallpaperlogs"; do
         mkdir -p "$dir"
     done
+    mkdir -p "$CACHE_DIR"
 
     install_deps
     install_gtk_theme

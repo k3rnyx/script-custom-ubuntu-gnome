@@ -12,7 +12,7 @@ log_file() {
 
 install_deps() {
     log_info "Instalando dependencias de extensiones..."
-    sudo apt install -y gir1.2-gtop-2.0 lm-sensors gettext libglib2.0-dev-bin
+    _apt_ensure gir1.2-gtop-2.0 lm-sensors gettext libglib2.0-dev-bin
     if [ $? -eq 0 ]; then
         log_file "OK" "Dependencias de extensiones instaladas"
     else
@@ -82,7 +82,7 @@ install_just_perfection() {
 
 install_color_picker() {
     log_info "Instalando gpick..."
-    sudo apt install -y gpick 2>/dev/null
+    _apt_ensure gpick
     if [ $? -eq 0 ]; then
         log_file "OK" "gpick (color picker) instalado"
     else

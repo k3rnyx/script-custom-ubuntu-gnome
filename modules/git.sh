@@ -4,7 +4,7 @@ source "$BASE_DIR/lib/ui.sh"
 
 if ! command -v git &> /dev/null; then
     log_info "Git no está instalado, instalando..."
-    sudo apt install git -y
+    _apt_ensure git
     log_ok "Git instalado correctamente"
 else
     log_ok "Git ya está instalado"

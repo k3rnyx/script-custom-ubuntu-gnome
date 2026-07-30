@@ -4,6 +4,7 @@ BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$BASE_DIR/lib/ui.sh"
 
 TERM_LOG="$BASE_DIR/assets/terminallogs/custom.log"
+CACHE_DIR="/tmp/tokyo-cache"
 
 log_file() {
     local status="$1" msg="$2"
@@ -11,15 +12,20 @@ log_file() {
 }
 
 install_kitty() {
-    log_info "Instalando Kitty terminal..."
-    sudo apt install -y kitty
-    if [ $? -ne 0 ]; then
-        log_file "FAIL" "Error instalando Kitty"
-        return 1
+    if ! command -v kitty &>/dev/null; then
+        log_info "Instalando Kitty terminal..."
+        _apt_ensure kitty || {
+            log_file "FAIL" "Error instalando Kitty"; return 1
+        }
+    else
+        log_info "Kitty ya instalado, configurando..."
     fi
 
     mkdir -p ~/.config/kitty
-    wget -q https://raw.githubusercontent.com/aerosol/tokyonight-kitty/master/tokyo-night.conf -O ~/.config/kitty/tokyo-night.conf
+    if [ ! -f "$CACHE_DIR/tokyo-night-kitty.conf" ]; then
+        wget -q https://raw.githubusercontent.com/aerosol/tokyonight-kitty/master/tokyo-night.conf -O "$CACHE_DIR/tokyo-night-kitty.conf"
+    fi
+    cp "$CACHE_DIR/tokyo-night-kitty.conf" ~/.config/kitty/tokyo-night.conf
 
     cat > ~/.config/kitty/kitty.conf << 'KITTYCONF'
 font_family JetBrainsMono Nerd Font
@@ -33,12 +39,25 @@ KITTYCONF
 
 install_ohmyzsh() {
     log_info "Instalando Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-    git clone --depth 1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k 2>/dev/null
-    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions 2>/dev/null
-    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting 2>/dev/null
-    git clone --depth 1 https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions 2>/dev/null
+    if [ ! -f "$CACHE_DIR/ohmyzsh-install.sh" ]; then
+        wget -q https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O "$CACHE_DIR/ohmyzsh-install.sh"
+    fi
+    [ ! -d ~/.oh-my-zsh ] && sh "$CACHE_DIR/ohmyzsh-install.sh" "" --unattended
+
+    _cache_clone() {
+        local repo="$1" dest="$2"
+        local name="${repo#*/}"
+        if [ ! -d "$CACHE_DIR/$name" ]; then
+            git clone --depth 1 "https://github.com/$repo.git" "$CACHE_DIR/$name" 2>/dev/null
+        fi
+        [ -d "$CACHE_DIR/$name" ] && rm -rf "$dest" && mkdir -p "${dest%/*}" && cp -r "$CACHE_DIR/$name" "$dest" 2>/dev/null
+    }
+
+    _cache_clone "romkatv/powerlevel10k" "$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
+    _cache_clone "zsh-users/zsh-autosuggestions" "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    _cache_clone "zsh-users/zsh-syntax-highlighting" "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    _cache_clone "zsh-users/zsh-completions" "$HOME/.oh-my-zsh/custom/plugins/zsh-completions"
 
     cat > ~/.zshrc << 'ZSHRC'
 export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -89,7 +108,7 @@ set_default_shell() {
 
 main() {
     log_info "Configurando terminal..."
-    mkdir -p "$(dirname "$TERM_LOG")"
+    mkdir -p "$(dirname "$TERM_LOG")" "$CACHE_DIR"
     echo "--- iniciando: $(date '+%Y-%m-%d %H:%M:%S') ---" >> "$TERM_LOG"
 
     install_kitty

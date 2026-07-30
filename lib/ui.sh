@@ -101,3 +101,20 @@ prompt_input() {
     read -r val || true
     echo "${val:-$default}"
 }
+
+_apt_ensure() {
+    local missing=()
+    for pkg in "$@"; do
+        dpkg -s "$pkg" 2>/dev/null | grep -qi 'Status.*installed' || missing+=("$pkg")
+    done
+    [ ${#missing[@]} -eq 0 ] && return 0
+
+    sudo -v 2>/dev/null || true
+    while sudo fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/apt/archives/lock &>/dev/null; do
+        sleep 5
+    done
+    sudo rm -f /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock /var/cache/apt/archives/lock 2>/dev/null
+    sudo dpkg --configure -a 2>/dev/null
+
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing[@]}"
+}

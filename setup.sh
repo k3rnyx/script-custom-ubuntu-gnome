@@ -106,8 +106,7 @@ draw_menu_items() {
     local sd=0; ((TERM_LINES >= 25)) && sd=1
 
     local pr="${lf}${TN_CYAN}"
-    local LM=16
-    printf -v LMp '%*s' "$LM" ''
+    local LM=18
 
     # ── top border ──
     echo -e "${pr}╔${bar}╗${RST}"
@@ -115,7 +114,7 @@ draw_menu_items() {
     # ── header ──
     local hdr="${TN_CYAN}◈  CONFIGURATION  ◈${RST}  ${TN_YELLOW}⚡ K3RNYX ⚡${RST}"
     local hv=32 hrp=$(printf '%*s' 27 '')
-    echo -e "${pr}║$(printf '%*s' "$((LM + 2))" '')${hdr}${hrp}${TN_CYAN}║${RST}"
+    echo -e "${pr}║$(printf '%*s' "$LM" '')${hdr}${hrp}${TN_CYAN}║${RST}"
 
     # ── separator ──
     echo -e "${pr}║${sl}${DIM}${sep}${RST}${sr}${TN_CYAN}║${RST}"
@@ -134,7 +133,7 @@ draw_menu_items() {
         local line="${ptr}${cb} ${nc}${num}${RST}  ${cl}${lbl}${RST}"
         local plain="  ○ ${num}  ${lbl}"
         local pw=${#plain}
-        local li=$((LM + 2))
+        local li=$LM
         local ti=$((inner - li - pw - 2))
         ((ti < 0)) && ti=0
         printf -v tip '%*s' "$ti" ''
@@ -157,76 +156,101 @@ draw_menu_items() {
     # ── footer ──
     local f1="${TN_PURPLE}⚡${RST} ${BLD}${TN_CYAN}[A]${RST} ${TN_FG}Ejecutar todo${RST} ${TN_PURPLE}⚡${RST} ${BLD}${TN_CYAN}[X]${RST} ${TN_FG}Salir${RST}"
     local fv=32 frp=$(printf '%*s' 27 '')
-    echo -e "${pr}║$(printf '%*s' "$((LM + 2))" '')${f1}${frp}${TN_CYAN}║${RST}"
+    echo -e "${pr}║$(printf '%*s' "$LM" '')${f1}${frp}${TN_CYAN}║${RST}"
 
     local f2="${DIM}${TN_FG}◈  ↑↓  ·  ◈ Espacio  ·  ◈ Enter${RST}"
     local fv2=31 frp2=$(printf '%*s' 29 '')
-    echo -e "${pr}║$(printf '%*s' "$((LM + 2))" '')${f2}${frp2}${TN_CYAN}║${RST}"
+    echo -e "${pr}║$(printf '%*s' "$LM" '')${f2}${frp2}${TN_CYAN}║${RST}"
 
     # ── bottom border ──
     echo -e "${pr}╚${bar}╝${RST}"
 }
 
-run_module() {
-    local idx=$(( $1 + _zoff ))
-    local file="${module_files[$idx]}"
-    local lbl="${module_labels[$idx]}"
-    echo ""
-    log_section "$lbl" "▶"
-    if [ -f "$file" ]; then
-        (bash "$file") || true
+run_tui() {
+    local mode="$1"
+    local all=0 indices=()
+    if [ "$mode" = "all" ]; then
+        for ((i=0; i<total; i++)); do indices+=($i); done
+        all=1
     else
-        log_error "No se encontró ${file}"
-    fi
-    echo ""
-    log_ok "Completado: ${lbl}"
-    echo ""
-    echo -n "  Presiona cualquier tecla para continuar..."; read -rsn1
-}
-
-run_selected() {
-    local any=0
-    for s in "${selected[@]}"; do ((s)) && { any=1; break; } done
-    if [ "$any" -eq 0 ]; then
-        echo ""
-        log_warn "No hay módulos seleccionados"
-        echo -n "  Presiona cualquier tecla..."; read -rsn1
-        return
+        for s in "${selected[@]}"; do ((s)) && { all=2; break; } done
+        [ "$all" -eq 0 ] && { echo; log_warn "No hay módulos seleccionados"; echo -n "  Presiona cualquier tecla..."; read -rsn 1; return; }
+        for ((i=0; i<total; i++)); do ((selected[i + _zoff])) && indices+=($i); done
     fi
 
-    __tc rmcup
-    __tc cnorm
-    clear_screen
-    draw_tokyo_frame "EJECUTANDO MÓDULOS" "Seleccionados" ""
+    __tc rmcup; __tc cnorm; clear_screen
+    _TUI_MODE=1
+    local spin=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 
-    for ((i=0; i<total; i++)); do
-        ((selected[i + _zoff])) && run_module "$i"
+    local _hdr=${indices[@]:0:1}
+    echo -e "  ${TN_YELLOW}⚡${RST}  ${TN_CYAN}${BLD}${module_labels[$((_hdr + _zoff))]}${RST}  ${DIM}${TN_FG}(+$(( ${#indices[@]} - 1 )) más)${RST}"
+    echo
+
+    local row_start=$(( $(tput lines 2>/dev/null || echo 24) - ${#indices[@]} - 4 ))
+    ((row_start < 2)) && row_start=2
+    tput cup "$row_start" 0 2>/dev/null
+    for idx in "${indices[@]}"; do
+        echo -e "  ${DIM}⬡${RST}  ${TN_FG}${module_labels[$((idx + _zoff))]}${RST}"
+    done
+    echo
+
+    local ok=0 fail=0
+    for pos in "${!indices[@]}"; do
+        local idx=${indices[$pos]} ai=$((idx + _zoff))
+        local lbl="${module_labels[$ai]}" file="${module_files[$ai]}"
+        local row=$((row_start + pos))
+
+        # Limpiar área para prompts de input
+        tput cup $((row_start + ${#indices[@]} + 1)) 0 2>/dev/null
+        echo -ne "\033[J"
+        tput cup "$row" 0 2>/dev/null
+        echo -ne "\r\033[K  ${TN_CYAN}${BLD}${spin[0]}${RST}  ${TN_CYAN}${BLD}${lbl}${RST}"
+
+        local logf="/tmp/tokyo-module-$$.log"
+        local pid rc
+        TERM=dumb script -qfc "bash '$file'" /dev/null </dev/tty >"$logf" 2>&1 &
+        pid=$!
+
+        local si=0 _l1
+        while kill -0 "$pid" 2>/dev/null; do
+            tput cup "$row" 0 2>/dev/null
+            echo -ne "\r\033[K  ${TN_CYAN}${BLD}${spin[$si]}${RST}  ${TN_CYAN}${BLD}${lbl}${RST}"
+            si=$(( (si + 1) % ${#spin[@]} ))
+            _l1=$(tail -1 "$logf" 2>/dev/null | tr -d '\r' | sed 's/^ *//;s/\x1b\[[0-9;]*m//g' | head -c 120)
+            [ -n "$_l1" ] && {
+                tput cup $((TERM_LINES - 2)) 0 2>/dev/null
+                echo -ne "\r\033[K  ${DIM}⚙${RST}  ${TN_FG}${_l1}${RST}"
+            }
+            sleep 0.1
+        done
+        wait "$pid"; rc=$?
+        # Limpiar línea de log
+        rm -f "$logf"
+        tput cup $((TERM_LINES - 2)) 0 2>/dev/null
+        echo -ne "\r\033[K"
+
+        tput cup "$row" 0 2>/dev/null
+        echo -ne "\r\033[K"
+        if [ $rc -eq 0 ]; then
+            echo -e "  ${TN_GREEN}${BLD}⬢${RST}  ${TN_GREEN}${lbl}${RST}"; ((ok++))
+        else
+            echo -e "  ${TN_PINK}${BLD}✗${RST}  ${TN_PINK}${lbl}${RST}"; ((fail++))
+        fi
+
+        tput cup $((row_start + ${#indices[@]})) 0 2>/dev/null
+        echo -ne "\r\033[K  ${TN_GREEN}${BLD}✓${RST} ${ok}  ${DIM}|${RST}  ${TN_PINK}${BLD}✗${RST} ${fail}  ${DIM}|${RST}  ${DIM}⬡${RST} $(( ${#indices[@]} - ok - fail ))${RST}"
     done
 
-    selected=(0 0 0 0 0)
-    echo ""
-    log_ok "${BLD}✔ Listo${RST}"
-    echo -n "  Presiona cualquier tecla para volver al menú..."; read -rsn1
-    __tc smcup
-    __tc civis
-    draw_init
+    echo
+    [ "$fail" -eq 0 ] && log_ok "${BLD}✔ Todo listo${RST}" || log_warn "${BLD}Algunos módulos fallaron${RST}"
+    ((_AUTO)) || { echo -n "  Presiona cualquier tecla para volver al menú..."; read -rsn 1; }
+    [ "$all" -eq 2 ] && selected=(0 0 0 0 0)
+    _TUI_MODE=0
+    __tc smcup; __tc civis; draw_init
 }
 
-run_all() {
-    __tc rmcup
-    __tc cnorm
-    clear_screen
-    draw_tokyo_frame "EJECUTANDO MÓDULOS" "Completos" ""
-
-    for ((i=0; i<total; i++)); do run_module "$i"; done
-    echo ""
-    log_ok "${BLD}✔ Setup completado${RST}"
-    echo -n "  Presiona cualquier tecla para volver al menú..."; read -rsn1
-    __tc smcup
-    __tc civis
-    draw_init
-}
-
+_AUTO=0
+_TUI_MODE=0
 _CLEANED=0
 cleanup() {
     ((_CLEANED)) && return
@@ -237,9 +261,19 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
+if [[ "$1" == "--auto" ]]; then
+    _AUTO=1
+    __tc smcup
+    __tc civis
+    draw_init
+    run_tui all
+    exit 0
+fi
+
 _on_resize() {
     TERM_W=$(tput cols 2>/dev/null || echo 72); ((TERM_W < 72)) && TERM_W=72
     TERM_LINES=$(tput lines 2>/dev/null || echo 24)
+    ((_TUI_MODE)) && return
     draw_init
 }
 trap _on_resize WINCH
@@ -249,9 +283,9 @@ __tc civis
 draw_init
 
 while true; do
-    read -rsn1 key
+    read -rsn 1 key
     if [[ "$key" == $'\033' ]]; then
-        read -rsn2 -t 0.1 key
+        read -rsn 2 -t 0.1 key
         case "$key" in
             '[A') ((current = (current - 1 + total) % total)); draw_menu_items ;;
             '[B') ((current = (current + 1) % total)); draw_menu_items ;;
@@ -262,10 +296,10 @@ while true; do
         local ai=$((current + _zoff))
         selected[ai]=$((1 - selected[ai]))
         draw_menu_items
-    elif [[ -z "$key" ]]; then
-        run_selected
+    elif [[ -z "$key" || "$key" == $'\n' || "$key" == $'\r' ]]; then
+        run_tui selected
     elif [[ "$key" =~ [aA] ]]; then
-        run_all
+        run_tui all
     elif [[ "$key" == 'g' ]]; then
         current=0; draw_menu_items
     elif [[ "$key" == 'G' ]]; then
