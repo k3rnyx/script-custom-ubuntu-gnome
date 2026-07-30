@@ -186,6 +186,84 @@ banner_jp2a() {
     return 0
 }
 
+# ── custom ASCII banners (no external tools) ────────────────
+__bline() {
+    local txt="$1" col="$2" i="$3"
+    if [[ -z "$txt" ]]; then
+        echo -e "${TN_CYAN}║${RST}  $(printf '%*s' "$i" '')  ${TN_CYAN}║${RST}"
+    else
+        local pl=$(((i - ${#txt}) / 2))
+        local pr=$((i - pl - ${#txt}))
+        echo -e "${TN_CYAN}║${RST}  $(printf '%*s' "$pl" '')${col}${txt}${RST}$(printf '%*s' "$pr" '')  ${TN_CYAN}║${RST}"
+    fi
+}
+
+banner_custom_01() {
+    local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
+    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    echo
+    echo -e "${TN_CYAN}╔${b}╗${RST}"
+    __bline "" "" "$i"
+    __bline "✦  UBUNTU SETUP  ✦" "$TN_YELLOW" "$i"
+    __bline "" "" "$i"
+    __bline "◈  ${u}@${h}  ◈" "$TN_GREEN" "$i"
+    __bline "" "" "$i"
+    __bline "✦  Interactive Menu  ✦" "$TN_PURPLE" "$i"
+    __bline "" "" "$i"
+    echo -e "${TN_CYAN}╚${b}╝${RST}"
+    echo
+}
+
+banner_custom_02() {
+    local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
+    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '─')
+    echo
+    echo -e "${TN_CYAN}╭${b}╮${RST}"
+    __bline "" "" "$i"
+    __bline "◆  UBUNTU SETUP  ◆" "$TN_BLUE" "$i"
+    __bline "" "" "$i"
+    __bline "•  ${u}@${h}  •" "$TN_CYAN" "$i"
+    __bline "" "" "$i"
+    __bline "◇  Interactive Menu  ◇" "$TN_FG" "$i"
+    __bline "" "" "$i"
+    echo -e "${TN_CYAN}╰${b}╯${RST}"
+    echo
+}
+
+banner_custom_03() {
+    local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
+    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    echo
+    echo -e "${TN_PURPLE}╔${b}╗${RST}"
+    __bline "✦  UBUNTU SETUP  ✦" "$TN_YELLOW" "$i"
+    __bline "◈  ${u}@${h}  ◈" "$TN_GREEN" "$i"
+    __bline "✦  Interactive Menu  ✦" "$TN_PURPLE" "$i"
+    echo -e "${TN_PURPLE}╚${b}╝${RST}"
+    echo
+}
+
+banner_custom_04() {
+    local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
+    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    local d=$(printf '%*s' "$i" '' | tr ' ' '─')
+    echo
+    echo -e "${TN_CYAN}╔${b}╗${RST}"
+    __bline "" "" "$i"
+    __bline "★  UBUNTU SETUP  ★" "$TN_YELLOW" "$i"
+    echo -e "${TN_CYAN}║${RST}  ${DIM}${d}${RST}  ${TN_CYAN}║${RST}"
+    __bline "◎  ${u}@${h}  ◎" "$TN_PINK" "$i"
+    echo -e "${TN_CYAN}║${RST}  ${DIM}${d}${RST}  ${TN_CYAN}║${RST}"
+    __bline "★  Interactive Menu  ★" "$TN_PURPLE" "$i"
+    __bline "" "" "$i"
+    echo -e "${TN_CYAN}╚${b}╝${RST}"
+    echo
+}
+
+banner_custom_ascii() {
+    local banners=(banner_custom_01 banner_custom_02 banner_custom_03 banner_custom_04)
+    "${banners[$((RANDOM % ${#banners[@]}))]}"
+}
+
 banner_text_only() {
     draw_tokyo_frame "UBUNTU SETUP" "Interactive Menu" ""
 }
@@ -194,6 +272,7 @@ show_banner() {
     local renderers=()
     command -v chafa &>/dev/null && renderers+=(banner_chafa)
     command -v jp2a &>/dev/null && renderers+=(banner_jp2a)
+    renderers+=(banner_custom_ascii)
     command -v toilet &>/dev/null && renderers+=(run_toilet_banner)
     command -v figlet &>/dev/null && renderers+=(run_figlet_banner)
 
