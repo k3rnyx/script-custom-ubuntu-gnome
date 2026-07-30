@@ -6,7 +6,7 @@ run_figlet_banner() {
     local font="${fonts[$idx]}"
     if command -v figlet &>/dev/null; then
         local lines
-        mapfile -t lines < <(figlet -f "$font" "UBUNTU SETUP" 2>/dev/null || figlet "UBUNTU SETUP" 2>/dev/null)
+        mapfile -t lines < <(figlet -f "$font" "TOKYO NIGHT" 2>/dev/null || figlet "TOKYO NIGHT" 2>/dev/null)
         local colors=("$TN_CYAN" "$TN_BLUE" "$TN_PURPLE" "$TN_PINK")
         local inner=70
         printf -v bar '%*s' "$inner" ''; bar=${bar// /═}
@@ -26,7 +26,7 @@ run_figlet_banner() {
         done
         printf -v sep '%*s' "$((inner - 8))" ''; sep=${sep// /─}
         echo -e "${TN_CYAN}║${RST}${TN_BG}   ${TN_PURPLE}${sep}${RST}   ${TN_CYAN}║${RST}"
-        local sub="Interactive Menu"
+        local sub="Ubuntu Setup by K3rNyx"
         local slen=${#sub}
         local spad=$(((inner - slen) / 2))
         local rpad=$((inner - slen - spad))
@@ -46,7 +46,7 @@ run_toilet_banner() {
     local font="${fonts[$idx]}"
     if command -v toilet &>/dev/null; then
         local lines
-        mapfile -t lines < <(toilet -w 70 -f "$font" "UBUNTU SETUP" 2>/dev/null)
+        mapfile -t lines < <(toilet -w 70 -f "$font" "TOKYO NIGHT" 2>/dev/null)
         local colors=("$TN_CYAN" "$TN_BLUE" "$TN_PURPLE" "$TN_PINK")
         local inner=70
         printf -v bar '%*s' "$inner" ''; bar=${bar// /═}
@@ -66,7 +66,7 @@ run_toilet_banner() {
         done
         printf -v sep '%*s' "$((inner - 8))" ''; sep=${sep// /─}
         echo -e "${TN_CYAN}║${RST}${TN_BG}   ${TN_PURPLE}${sep}${RST}   ${TN_CYAN}║${RST}"
-        local sub="Interactive Menu"
+        local sub="Ubuntu Setup by K3rNyx"
         local slen=${#sub}
         local spad=$(((inner - slen) / 2))
         local rpad=$((inner - slen - spad))
@@ -162,7 +162,7 @@ banner_chafa() {
         ((cols > 72)) && cols=72
         chafa --color-space=rgb --symbols all --size="${cols}x25" "$img" 2>/dev/null || return 1
         echo
-        draw_tokyo_frame "UBUNTU SETUP" "Interactive Menu" ""
+        draw_tokyo_frame "UBUNTU TOKYO NIGHT SETUP" "Tokyo Night . v2.0" "K3rNyx"
         return 0
     fi
     return 1
@@ -182,7 +182,7 @@ banner_jp2a() {
     ((cols > 72)) && cols=72
     jp2a --colors --width="$cols" "$img" 2>/dev/null || return 1
     echo
-    draw_tokyo_frame "UBUNTU SETUP" "Interactive Menu" ""
+    draw_tokyo_frame "UBUNTU TOKYO NIGHT SETUP" "Tokyo Night . v2.0" "K3rNyx"
     return 0
 }
 
@@ -204,11 +204,11 @@ banner_custom_01() {
     echo
     echo -e "${TN_CYAN}╔${b}╗${RST}"
     __bline "" "" "$i"
-    __bline "✦  UBUNTU SETUP  ✦" "$TN_YELLOW" "$i"
+    __bline "✦  TOKYO NIGHT  ✦" "$TN_YELLOW" "$i"
     __bline "" "" "$i"
     __bline "◈  ${u}@${h}  ◈" "$TN_GREEN" "$i"
     __bline "" "" "$i"
-    __bline "✦  Interactive Menu  ✦" "$TN_PURPLE" "$i"
+    __bline "✦  Tokyo Night  ✦" "$TN_PURPLE" "$i"
     __bline "" "" "$i"
     echo -e "${TN_CYAN}╚${b}╝${RST}"
     echo
@@ -220,11 +220,11 @@ banner_custom_02() {
     echo
     echo -e "${TN_CYAN}╭${b}╮${RST}"
     __bline "" "" "$i"
-    __bline "◆  UBUNTU SETUP  ◆" "$TN_BLUE" "$i"
+    __bline "◆  TOKYO NIGHT  ◆" "$TN_BLUE" "$i"
     __bline "" "" "$i"
     __bline "•  ${u}@${h}  •" "$TN_CYAN" "$i"
     __bline "" "" "$i"
-    __bline "◇  Interactive Menu  ◇" "$TN_FG" "$i"
+    __bline "◇  Tokyo Night  ◇" "$TN_FG" "$i"
     __bline "" "" "$i"
     echo -e "${TN_CYAN}╰${b}╯${RST}"
     echo
@@ -235,9 +235,9 @@ banner_custom_03() {
     local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
     echo
     echo -e "${TN_PURPLE}╔${b}╗${RST}"
-    __bline "✦  UBUNTU SETUP  ✦" "$TN_YELLOW" "$i"
+    __bline "✦  TOKYO NIGHT  ✦" "$TN_YELLOW" "$i"
     __bline "◈  ${u}@${h}  ◈" "$TN_GREEN" "$i"
-    __bline "✦  Interactive Menu  ✦" "$TN_PURPLE" "$i"
+    __bline "✦  Tokyo Night  ✦" "$TN_PURPLE" "$i"
     echo -e "${TN_PURPLE}╚${b}╝${RST}"
     echo
 }
@@ -249,11 +249,11 @@ banner_custom_04() {
     echo
     echo -e "${TN_CYAN}╔${b}╗${RST}"
     __bline "" "" "$i"
-    __bline "★  UBUNTU SETUP  ★" "$TN_YELLOW" "$i"
+    __bline "★  TOKYO NIGHT  ★" "$TN_YELLOW" "$i"
     echo -e "${TN_CYAN}║${RST}  ${DIM}${d}${RST}  ${TN_CYAN}║${RST}"
     __bline "◎  ${u}@${h}  ◎" "$TN_PINK" "$i"
     echo -e "${TN_CYAN}║${RST}  ${DIM}${d}${RST}  ${TN_CYAN}║${RST}"
-    __bline "★  Interactive Menu  ★" "$TN_PURPLE" "$i"
+    __bline "★  Tokyo Night  ★" "$TN_PURPLE" "$i"
     __bline "" "" "$i"
     echo -e "${TN_CYAN}╚${b}╝${RST}"
     echo
@@ -265,21 +265,14 @@ banner_custom_ascii() {
 }
 
 banner_text_only() {
-    draw_tokyo_frame "UBUNTU SETUP" "Interactive Menu" ""
+    draw_tokyo_frame "UBUNTU TOKYO NIGHT SETUP" "Tokyo Night . v2.0" "K3rNyx"
 }
 
 show_banner() {
-    local renderers=()
-    command -v chafa &>/dev/null && renderers+=(banner_chafa)
-    command -v jp2a &>/dev/null && renderers+=(banner_jp2a)
-    renderers+=(banner_custom_ascii)
-    command -v toilet &>/dev/null && renderers+=(run_toilet_banner)
-    command -v figlet &>/dev/null && renderers+=(run_figlet_banner)
-
-    if [[ ${#renderers[@]} -gt 0 ]]; then
-        local idx=$((RANDOM % ${#renderers[@]}))
-        "${renderers[$idx]}" && return
-    fi
-
+    banner_chafa && return
+    banner_jp2a && return
+    banner_custom_ascii && return
+    run_toilet_banner && return
+    run_figlet_banner && return
     banner_text_only
 }

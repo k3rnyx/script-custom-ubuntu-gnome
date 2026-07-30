@@ -56,19 +56,20 @@ draw_tokyo_frame() {
     local pad=$((inner - tlen - slen - 2))
     ((pad < 1)) && pad=1
     printf -v spaces '%*s' "$pad" ''
-    echo -e "${TN_CYAN}╔${line}╗${RST}"
-    echo -e "${TN_CYAN}║${RST} ${TN_PURPLE}${BLD}${title}${RST}${TN_FG}${spaces}${subtitle} ${TN_CYAN}║${RST}"
+    echo -e "\e[2K\r"
+    echo -e "\e[2K\r${TN_CYAN}╔${line}╗${RST}"
+    echo -e "\e[2K\r${TN_CYAN}║${RST} ${TN_PURPLE}${BLD}${title}${RST}${TN_FG}${spaces}${subtitle} ${TN_CYAN}║${RST}"
     if [[ -n "$credit" ]]; then
         printf -v sp '%*s' "$((inner - 2))" ''
-        echo -e "${TN_CYAN}║${RST}${TN_FG}${sp}${TN_CYAN}║${RST}"
+        echo -e "\e[2K\r${TN_CYAN}║${RST}${TN_FG}${sp}${TN_CYAN}║${RST}"
         local txt="by ${credit}"
         local tpad=$((inner - ${#txt} - 2))
         ((tpad < 1)) && tpad=1
         printf -v sp '%*s' "$tpad" ''
-        echo -e "${TN_CYAN}║${RST} ${TN_FG}${sp}${TN_PURPLE}${txt}${RST} ${TN_CYAN}║${RST}"
+        echo -e "\e[2K\r${TN_CYAN}║${RST} ${TN_FG}${sp}${TN_PURPLE}${txt}${RST} ${TN_CYAN}║${RST}"
     fi
-    echo -e "${TN_CYAN}╚${line}╝${RST}"
-    echo
+    echo -e "\e[2K\r${TN_CYAN}╚${line}╝${RST}"
+    echo -e "\e[2K\r"
 }
 
 log_section() {
