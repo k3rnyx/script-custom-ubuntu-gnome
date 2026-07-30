@@ -12,6 +12,8 @@ readonly RST='\e[0m'
 readonly BLD='\e[1m'
 readonly DIM='\e[2m'
 
+TERM_W=$(tput cols 2>/dev/null || echo 72); ((TERM_W < 72)) && TERM_W=72
+
 log_info()    { echo -e "  ${TN_CYAN}◆${RST}  ${TN_FG}$*${RST}"; }
 log_ok()      { echo -e "  ${TN_GREEN}✓${RST}  ${TN_FG}$*${RST}"; }
 log_error()   { echo -e "  ${TN_PINK}✗${RST}  ${TN_FG}$*${RST}"; }
@@ -38,7 +40,7 @@ run_with_spinner() {
 }
 
 draw_progress_bar() {
-    local current=$1 total=$2 width=20
+    local current=$1 total=$2 width=$((TERM_W / 5))
     ((total < 1)) && total=1
     local pct=$((current * 100 / total))
     local filled=$((current * width / total))
@@ -50,34 +52,36 @@ draw_progress_bar() {
 
 draw_tokyo_frame() {
     local title="$1" subtitle="$2" credit="$3"
-    local w=72
-    local inner=$((w - 2))
+    local mw=$((TERM_W > 80 ? 80 : TERM_W))
+    local lo=$(((TERM_W - mw) / 2))
+    ((lo < 0)) && lo=0
+    printf -v lf '%*s' "$lo" ''
+    local inner=$((mw - 2))
     printf -v line '%*s' "$inner" ''; line=${line// /═}
     local tlen=${#title} slen=${#subtitle}
     local pad=$((inner - tlen - slen - 2))
     ((pad < 1)) && pad=1
     printf -v spaces '%*s' "$pad" ''
-    echo -e "\e[2K\r"
-    echo -e "\e[2K\r${TN_CYAN}╔${line}╗${RST}"
-    echo -e "\e[2K\r${TN_CYAN}║${RST} ${TN_PURPLE}${BLD}${title}${RST}${TN_FG}${spaces}${subtitle} ${TN_CYAN}║${RST}"
+    local pr="${lf}${TN_CYAN}"
+    echo -e "${pr}╔${line}╗${RST}"
+    echo -e "${pr}║${RST} ${TN_PURPLE}${BLD}${title}${RST}${TN_FG}${spaces}${subtitle} ${TN_CYAN}║${RST}"
     if [[ -n "$credit" ]]; then
         printf -v sp '%*s' "$inner" ''
-        echo -e "\e[2K\r${TN_CYAN}║${RST}${TN_FG}${sp}${TN_CYAN}║${RST}"
+        echo -e "${pr}║${RST}${TN_FG}${sp}${TN_CYAN}║${RST}"
         local txt="by ${credit}"
         local tpad=$((inner - ${#txt} - 2))
         ((tpad < 1)) && tpad=1
         printf -v sp '%*s' "$tpad" ''
-        echo -e "\e[2K\r${TN_CYAN}║${RST} ${TN_FG}${sp}${TN_PURPLE}${txt}${RST} ${TN_CYAN}║${RST}"
+        echo -e "${pr}║${RST} ${TN_FG}${sp}${TN_PURPLE}${txt}${RST} ${TN_CYAN}║${RST}"
     fi
-    echo -e "\e[2K\r${TN_CYAN}╚${line}╝${RST}"
-    echo -e "\e[2K\r"
+    echo -e "${pr}╚${line}╝${RST}"
 }
 
 log_section() {
     local title="$1" icon="$2"
     local w
     w=$(tput cols 2>/dev/null || echo 60)
-    ((w = w > 80 ? 80 : w))
+    ((w = w > TERM_W ? TERM_W : w))
     ((w = w < 40 ? 40 : w))
     local inner=$((w - 2))
     printf -v line '%*s' "$inner" ''; line=${line// /═}
