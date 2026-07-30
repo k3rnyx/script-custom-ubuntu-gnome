@@ -1,0 +1,14 @@
+--- iniciando: 2026-07-30 09:46:39 ---
+[OK] 2026-07-30 09:46:49 — Dependencias de extensiones instaladas
+[OK] 2026-07-30 09:46:51 — Blur my Shell instalado
+[OK] 2026-07-30 09:46:53 — Vitals instalado
+[OK] 2026-07-30 09:46:55 — Clipboard Indicator instalado
+[OK] 2026-07-30 09:46:56 — Just Perfection instalado
+[OK] 2026-07-30 09:47:04 — gpick (color picker) instalado
+[OK] 2026-07-30 09:47:05 — Dash to Dock configurado
+[FAIL] 2026-07-30 09:47:05 — blur-my-shell@aunetx no encontrada para habilitar
+[FAIL] 2026-07-30 09:47:05 — Vitals@CoreCoding.com no encontrada para habilitar
+[FAIL] 2026-07-30 09:47:05 — clipboard-indicator@tudmotu.com no encontrada para habilitar
+[FAIL] 2026-07-30 09:47:05 — just-perfection-desktop@just-perfection no encontrada para habilitar
+[OK] 2026-07-30 09:47:05 — tiling-assistant@ubuntu.com habilitada
+[OK] 2026-07-30 09:47:05 — ubuntu-dock@ubuntu.com habilitada

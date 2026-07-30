@@ -80,7 +80,7 @@ run_toilet_banner() {
     return 1
 }
 
-generate_ppm_images() {
+generate_banner_images() {
     if ! command -v python3 &>/dev/null; then
         echo "/tmp/tokyo-banners"
         return
@@ -88,14 +88,15 @@ generate_ppm_images() {
     local tmp_dir="/tmp/tokyo-banners"
     mkdir -p "$tmp_dir"
     for theme in tower fuji torii lanterns abstract; do
-        local file="${tmp_dir}/${theme}.ppm"
+        local file="${tmp_dir}/${theme}.png"
         [[ -f "$file" ]] && continue
         python3 -c "
-import sys
+from PIL import Image
 w, h = 160, 45
 pal = {'bg':(26,27,38),'cyan':(125,207,255),'blue':(122,162,247),'purple':(187,154,247),'pink':(247,118,142),'green':(158,206,106),'yellow':(224,175,104),'fg':(192,202,245),'white':(255,255,220)}
 t = '$theme'
-p = []
+img = Image.new('RGB', (w, h))
+px = img.load()
 for y in range(h):
     for x in range(w):
         r, g, b = pal['bg']
@@ -141,10 +142,8 @@ for y in range(h):
                 d = (x-cx)**2+(y-cy)**2
                 if d<rad**2: f=1-d/rad**2; r=int(col[0]*f); g=int(col[1]*f); b=int(col[2]*f)
                 if (rad-2)**2<d<(rad-4)**2: r,g,b = 255,255,255
-        p.extend([r,g,b])
-with open('$file','w') as f:
-    f.write('P3\n'+f'{w} {h}\n'+'255\n')
-    for i in range(0,len(p),3): f.write(f'{p[i]} {p[i+1]} {p[i+2]}\n')
+        px[x, y] = (r, g, b)
+img.save('$file', 'PNG')
 " 2>/dev/null || true
     done
     echo "$tmp_dir"
@@ -152,10 +151,10 @@ with open('$file','w') as f:
 
 banner_chafa() {
     local tmp_dir
-    tmp_dir=$(generate_ppm_images)
+    tmp_dir=$(generate_banner_images)
     local themes=("tower" "fuji" "torii" "lanterns" "abstract")
     local idx=$((RANDOM % ${#themes[@]}))
-    local img="${tmp_dir}/${themes[$idx]}.ppm"
+    local img="${tmp_dir}/${themes[$idx]}.png"
     if [[ -f "$img" ]] && command -v chafa &>/dev/null; then
         local cols
         cols=$(tput cols 2>/dev/null || echo 80)
@@ -200,7 +199,7 @@ __bline() {
 
 banner_custom_01() {
     local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
-    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    local i=$((72-6)) b=$(printf '%*s' "$((72-2))" '' | tr ' ' '═')
     echo
     echo -e "${TN_CYAN}╔${b}╗${RST}"
     __bline "" "" "$i"
@@ -216,7 +215,7 @@ banner_custom_01() {
 
 banner_custom_02() {
     local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
-    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '─')
+    local i=$((72-6)) b=$(printf '%*s' "$((72-2))" '' | tr ' ' '─')
     echo
     echo -e "${TN_CYAN}╭${b}╮${RST}"
     __bline "" "" "$i"
@@ -232,7 +231,7 @@ banner_custom_02() {
 
 banner_custom_03() {
     local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
-    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    local i=$((72-6)) b=$(printf '%*s' "$((72-2))" '' | tr ' ' '═')
     echo
     echo -e "${TN_PURPLE}╔${b}╗${RST}"
     __bline "✦  TOKYO NIGHT  ✦" "$TN_YELLOW" "$i"
@@ -244,7 +243,7 @@ banner_custom_03() {
 
 banner_custom_04() {
     local u="${USER:-?}" h=$(hostname 2>/dev/null || echo '?')
-    local i=$((72-6)) b=$(printf '%*s' "$i" '' | tr ' ' '═')
+    local i=$((72-6)) b=$(printf '%*s' "$((72-2))" '' | tr ' ' '═')
     local d=$(printf '%*s' "$i" '' | tr ' ' '─')
     echo
     echo -e "${TN_CYAN}╔${b}╗${RST}"
@@ -269,10 +268,14 @@ banner_text_only() {
 }
 
 show_banner() {
-    banner_chafa && return
-    banner_jp2a && return
-    banner_custom_ascii && return
-    run_toilet_banner && return
-    run_figlet_banner && return
-    banner_text_only
+    local available=()
+
+    command -v chafa &>/dev/null && command -v python3 &>/dev/null && available+=(banner_chafa)
+    command -v jp2a &>/dev/null && available+=(banner_jp2a)
+    command -v figlet &>/dev/null && available+=(run_figlet_banner)
+    command -v toilet &>/dev/null && available+=(run_toilet_banner)
+    available+=(banner_custom_ascii banner_text_only)
+
+    local idx=$((RANDOM % ${#available[@]}))
+    "${available[$idx]}" || banner_text_only
 }

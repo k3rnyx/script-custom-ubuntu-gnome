@@ -5,3 +5,8 @@
 [FAIL] 2026-07-29 17:10:42 — Error instalando Papirus
 [OK] 2026-07-29 17:11:22 — SEA instalado desde master.zip
 [OK] 2026-07-29 17:11:29 — Icon theme: Sea
+[OK] 2026-07-30 09:45:34 — Papirus base instalado en ~/.icons/
+[FAIL] 2026-07-30 09:45:46 — Error instalando SEA
+[FAIL] 2026-07-30 09:45:55 — Error instalando inkscape/xcursorgen
+[OK] 2026-07-30 09:45:55 — Icon theme: Sea
+[OK] 2026-07-30 09:45:55 — Cursor: material_light_cursors

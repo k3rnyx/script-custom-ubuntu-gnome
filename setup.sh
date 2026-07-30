@@ -54,6 +54,10 @@ __tc() {
 }
 
 TERM_LINES=$(tput lines 2>/dev/null || echo 24)
+if ((TERM_LINES < 15)); then
+    echo -e "${TN_YELLOW}⚠ Terminal demasiado pequeña (${TERM_LINES} líneas) — mínimo 15${RST}"
+    exit 1
+fi
 MENU_HEIGHT=$((total + 4))
 BANNER_ROWS=0
 
@@ -64,7 +68,7 @@ clear_screen() {
 
 draw_init() {
     clear_screen
-    show_banner > /tmp/tokyo-banner.txt
+    show_banner | perl -pe 's/\e\[2K\r//g; s/\e\[\?25[lh]//g' > /tmp/tokyo-banner.txt
     BANNER_ROWS=$(wc -l < /tmp/tokyo-banner.txt)
 
     local avail=$((TERM_LINES - MENU_HEIGHT - 2))
@@ -102,7 +106,7 @@ run_module() {
     echo ""
     log_section "$lbl" "▶"
     if [ -f "$file" ]; then
-        bash "$file"
+        (bash "$file") || true
     else
         log_error "No se encontró ${file}"
     fi

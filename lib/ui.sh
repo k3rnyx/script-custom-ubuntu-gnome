@@ -50,7 +50,8 @@ draw_progress_bar() {
 
 draw_tokyo_frame() {
     local title="$1" subtitle="$2" credit="$3"
-    local w=72 inner=$((w - 2))
+    local w=72
+    local inner=$((w - 2))
     printf -v line '%*s' "$inner" ''; line=${line// /═}
     local tlen=${#title} slen=${#subtitle}
     local pad=$((inner - tlen - slen - 2))
@@ -60,7 +61,7 @@ draw_tokyo_frame() {
     echo -e "\e[2K\r${TN_CYAN}╔${line}╗${RST}"
     echo -e "\e[2K\r${TN_CYAN}║${RST} ${TN_PURPLE}${BLD}${title}${RST}${TN_FG}${spaces}${subtitle} ${TN_CYAN}║${RST}"
     if [[ -n "$credit" ]]; then
-        printf -v sp '%*s' "$((inner - 2))" ''
+        printf -v sp '%*s' "$inner" ''
         echo -e "\e[2K\r${TN_CYAN}║${RST}${TN_FG}${sp}${TN_CYAN}║${RST}"
         local txt="by ${credit}"
         local tpad=$((inner - ${#txt} - 2))
