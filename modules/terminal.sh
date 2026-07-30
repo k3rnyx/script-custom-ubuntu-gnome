@@ -1,18 +1,20 @@
 #!/bin/bash
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$BASE_DIR/lib/ui.sh"
+
 TERM_LOG="$BASE_DIR/assets/terminallogs/custom.log"
 
-log() {
+log_file() {
     local status="$1" msg="$2"
     echo "[$status] $(date '+%Y-%m-%d %H:%M:%S') — $msg" >> "$TERM_LOG"
 }
 
 install_kitty() {
-    echo "instalando Kitty terminal..."
+    log_info "Instalando Kitty terminal..."
     sudo apt install -y kitty
     if [ $? -ne 0 ]; then
-        log "FAIL" "Error instalando Kitty"
+        log_file "FAIL" "Error instalando Kitty"
         return 1
     fi
 
@@ -26,11 +28,11 @@ background_opacity 0.9
 include tokyo-night.conf
 KITTYCONF
 
-    log "OK" "Kitty instalado y configurado con Tokyo Night"
+    log_file "OK" "Kitty instalado y configurado con Tokyo Night"
 }
 
 install_ohmyzsh() {
-    echo "instalando Oh My Zsh..."
+    log_info "Instalando Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
     git clone --depth 1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k 2>/dev/null
@@ -59,34 +61,34 @@ setopt SHARE_HISTORY
 setopt HIST_IGNORE_DUPS
 ZSHRC
 
-    log "OK" "Oh My Zsh + p10k + plugins instalados"
+    log_file "OK" "Oh My Zsh + p10k + plugins instalados"
 }
 
 set_kitty_icon() {
-    echo "configurando icono de Kitty..."
+    log_info "Configurando icono de Kitty..."
     local icon_src
     icon_src=$(find ~/.icons -path "*/48x48/apps/kitty.svg" 2>/dev/null | head -1)
     if [ -n "$icon_src" ]; then
         mkdir -p ~/.local/share/icons/hicolor/48x48/apps
         cp "$icon_src" ~/.local/share/icons/hicolor/48x48/apps/kitty.svg
         gtk-update-icon-cache ~/.local/share/icons/ 2>/dev/null || true
-        log "OK" "Icono de Kitty personalizado (Papirus)"
+        log_file "OK" "Icono de Kitty personalizado (Papirus)"
     else
-        log "OK" "Icono default de Kitty (Papirus no encontrado)"
+        log_file "OK" "Icono default de Kitty (Papirus no encontrado)"
     fi
 }
 
 set_default_shell() {
-    echo "cambiando shell default a ZSH..."
+    log_info "Cambiando shell default a ZSH..."
     if [ "$SHELL" != "$(which zsh)" ]; then
-        chsh -s "$(which zsh)" && log "OK" "Shell default cambiado a ZSH" || log "FAIL" "Error cambiando shell (puede requerir contrasena)"
+        chsh -s "$(which zsh)" && log_file "OK" "Shell default cambiado a ZSH" || log_file "FAIL" "Error cambiando shell (puede requerir contraseña)"
     else
-        log "OK" "ZSH ya es el shell default"
+        log_file "OK" "ZSH ya es el shell default"
     fi
 }
 
 main() {
-    echo "=== configurando terminal ==="
+    log_info "Configurando terminal..."
     mkdir -p "$(dirname "$TERM_LOG")"
     echo "--- iniciando: $(date '+%Y-%m-%d %H:%M:%S') ---" >> "$TERM_LOG"
 
@@ -95,10 +97,10 @@ main() {
     set_kitty_icon
     set_default_shell
 
-    echo "=== terminal configurada ==="
-    echo "logs: $TERM_LOG"
+    log_ok "Terminal configurada"
+    log_detail "Logs: $TERM_LOG"
     echo ""
-    echo "IMPORTANTE: reinicia sesion para usar ZSH como shell default."
+    echo -e "  ${TN_YELLOW}⚠${RST}  ${TN_FG}Reinicia sesión para usar ZSH como shell default.${RST}"
 }
 
 main

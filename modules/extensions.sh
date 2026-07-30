@@ -1,25 +1,27 @@
 #!/bin/bash
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$BASE_DIR/lib/ui.sh"
+
 EXT_LOG="$BASE_DIR/assets/extensionslogs/custom.log"
 
-log() {
+log_file() {
     local status="$1" msg="$2"
     echo "[$status] $(date '+%Y-%m-%d %H:%M:%S') — $msg" >> "$EXT_LOG"
 }
 
 install_deps() {
-    echo "instalando dependencias de extensiones..."
+    log_info "Instalando dependencias de extensiones..."
     sudo apt install -y gir1.2-gtop-2.0 lm-sensors gettext libglib2.0-dev-bin
     if [ $? -eq 0 ]; then
-        log "OK" "Dependencias de extensiones instaladas"
+        log_file "OK" "Dependencias de extensiones instaladas"
     else
-        log "FAIL" "Error instalando dependencias de extensiones"
+        log_file "FAIL" "Error instalando dependencias de extensiones"
     fi
 }
 
 install_blur_my_shell() {
-    echo "instalando Blur my Shell..."
+    log_info "Instalando Blur my Shell..."
     git clone --depth 1 https://github.com/aunetx/blur-my-shell.git /tmp/blur-my-shell 2>/dev/null
     cd /tmp/blur-my-shell
     make install 2>/dev/null
@@ -27,14 +29,14 @@ install_blur_my_shell() {
     cd "$BASE_DIR"
     rm -rf /tmp/blur-my-shell
     if [ $result -eq 0 ]; then
-        log "OK" "Blur my Shell instalado"
+        log_file "OK" "Blur my Shell instalado"
     else
-        log "FAIL" "Error instalando Blur my Shell"
+        log_file "FAIL" "Error instalando Blur my Shell"
     fi
 }
 
 install_vitals() {
-    echo "instalando Vitals..."
+    log_info "Instalando Vitals..."
     mkdir -p ~/.local/share/gnome-shell/extensions
     if [ -d ~/.local/share/gnome-shell/extensions/Vitals@CoreCoding.com ]; then
         rm -rf ~/.local/share/gnome-shell/extensions/Vitals@CoreCoding.com
@@ -42,54 +44,54 @@ install_vitals() {
     git clone https://github.com/corecoding/Vitals.git ~/.local/share/gnome-shell/extensions/Vitals@CoreCoding.com -b develop 2>/dev/null
     glib-compile-schemas --strict ~/.local/share/gnome-shell/extensions/Vitals@CoreCoding.com/schemas/ 2>/dev/null
     if [ $? -eq 0 ]; then
-        log "OK" "Vitals instalado"
+        log_file "OK" "Vitals instalado"
     else
-        log "FAIL" "Error instalando Vitals"
+        log_file "FAIL" "Error instalando Vitals"
     fi
 }
 
 install_clipboard_indicator() {
-    echo "instalando Clipboard Indicator..."
+    log_info "Instalando Clipboard Indicator..."
     mkdir -p ~/.local/share/gnome-shell/extensions
     if [ -d ~/.local/share/gnome-shell/extensions/clipboard-indicator@tudmotu.com ]; then
         rm -rf ~/.local/share/gnome-shell/extensions/clipboard-indicator@tudmotu.com
     fi
     git clone https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator.git ~/.local/share/gnome-shell/extensions/clipboard-indicator@tudmotu.com 2>/dev/null
     if [ $? -eq 0 ]; then
-        log "OK" "Clipboard Indicator instalado"
+        log_file "OK" "Clipboard Indicator instalado"
     else
-        log "FAIL" "Error instalando Clipboard Indicator"
+        log_file "FAIL" "Error instalando Clipboard Indicator"
     fi
 }
 
 install_just_perfection() {
-    echo "instalando Just Perfection..."
+    log_info "Instalando Just Perfection..."
     git clone --depth 1 https://gitlab.gnome.org/jrahmatzadeh/just-perfection.git /tmp/just-perfection 2>/dev/null || {
-        log "FAIL" "Error clonando Just Perfection"
+        log_file "FAIL" "Error clonando Just Perfection"
         return 1
     }
     cd /tmp/just-perfection
     if ./scripts/build.sh -i 2>/dev/null; then
-        log "OK" "Just Perfection instalado"
+        log_file "OK" "Just Perfection instalado"
     else
-        log "FAIL" "Error instalando Just Perfection (permisos?)"
+        log_file "FAIL" "Error instalando Just Perfection (permisos?)"
     fi
     cd "$BASE_DIR"
     rm -rf /tmp/just-perfection
 }
 
 install_color_picker() {
-    echo "instalando gpick..."
+    log_info "Instalando gpick..."
     sudo apt install -y gpick 2>/dev/null
     if [ $? -eq 0 ]; then
-        log "OK" "gpick (color picker) instalado"
+        log_file "OK" "gpick (color picker) instalado"
     else
-        log "FAIL" "Error instalando gpick"
+        log_file "FAIL" "Error instalando gpick"
     fi
 }
 
 configure_dock() {
-    echo "configurando Dash to Dock..."
+    log_info "Configurando Dash to Dock..."
     gsettings set org.gnome.shell.extensions.dash-to-dock autohide true
     gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen true
     gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.0
@@ -147,11 +149,11 @@ configure_dock() {
     gsettings set org.gnome.shell.extensions.dash-to-dock bolt-support true
     gsettings set org.gnome.shell.extensions.dash-to-dock apply-glossy-effect true
     gsettings set org.gnome.shell.extensions.dash-to-dock apply-custom-theme false
-    log "OK" "Dash to Dock configurado"
+    log_file "OK" "Dash to Dock configurado"
 }
 
 enable_all() {
-    echo "habilitando extensiones..."
+    log_info "Habilitando extensiones..."
     local uuids=(
         "blur-my-shell@aunetx"
         "Vitals@CoreCoding.com"
@@ -162,15 +164,15 @@ enable_all() {
     )
     for uuid in "${uuids[@]}"; do
         if gnome-extensions enable "$uuid" 2>/dev/null; then
-            log "OK" "$uuid habilitada"
+            log_file "OK" "$uuid habilitada"
         else
-            log "FAIL" "$uuid no encontrada para habilitar"
+            log_file "FAIL" "$uuid no encontrada para habilitar"
         fi
     done
 }
 
 main() {
-    echo "=== instalando extensiones gnome ==="
+    log_info "Instalando extensiones GNOME..."
     mkdir -p "$(dirname "$EXT_LOG")"
     echo "--- iniciando: $(date '+%Y-%m-%d %H:%M:%S') ---" >> "$EXT_LOG"
 
@@ -183,11 +185,11 @@ main() {
     configure_dock
     enable_all
 
-    echo "=== extensiones instaladas y configuradas ==="
-    echo "logs: $EXT_LOG"
+    log_ok "Extensiones instaladas y configuradas"
+    log_detail "Logs: $EXT_LOG"
     echo ""
-    echo "IMPORTANTE: cierra sesion y vuelve a entrar (o reinicia)"
-    echo "para que las extensiones nuevas aparezcan en gnome-extensions."
+    echo -e "  ${TN_YELLOW}⚠${RST}  ${TN_FG}Cierra sesión y vuelve a entrar (o reinicia)${RST}"
+    echo -e "  ${TN_FG}para que las extensiones nuevas aparezcan en gnome-extensions.${RST}"
 }
 
 main

@@ -1,3 +1,10 @@
 #!/bin/bash
-echo "actualizando el sistema y los paquetes de Ubuntu"
-sudo apt update && sudo apt upgrade -y
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$BASE_DIR/lib/ui.sh"
+
+log_info "Actualizando lista de paquetes..."
+if sudo apt update -y && sudo apt upgrade -y; then
+    log_ok "Sistema actualizado correctamente"
+else
+    log_error "Error al actualizar el sistema"
+fi
